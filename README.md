@@ -1,6 +1,7 @@
 RecipeWatch
 ===========
-Project about exploring concepts from youtube videos with no supervision. Including sub-modules
+RecipeWatch is exploring concepts from youtube videos with no supervision. Project is composed of following sub-modules:
+
 - [Web Crawler](#web-crawler): A python script search youtube and wikihow and dowload videos with their subtitles if available.
 - [Vision Module](#vision-module): An unsupervised object clustering, feature extraction system.
 - [Language Module](#language-module): A language system processing subtitles.
