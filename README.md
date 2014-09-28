@@ -38,3 +38,11 @@ pipeLine_scale.py               #Resize frames for cpmc
 pipeLine_cpmc.py                #Create the folder structure for cpmc code
 pipeLine_hist.py                #Create .mat file with the list of frames
 ```
+
+##Vision Module
+```
+collectHistogram.m              #Run after cpmc is done to compute histograms
+cpmc_base/                      #Constrained parametric min-cut for object proposals
+CoProposals/                    #Code to generate co-object proposals. For the details look at the documentation
+```
+
