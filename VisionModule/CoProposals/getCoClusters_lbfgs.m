@@ -59,7 +59,6 @@ if nargin < 5
             end
             AC{j,i} = newA';                
         end
-       end
     end
 end
 toc
