@@ -50,16 +50,27 @@ if nargin < 5
                 [val,ind] = sort(color_K(k,:),'descend');
                 newA(k,ind(1:knn)) = val(1:knn);
             end
-            AC{i,j} = newA;
+            ACD{idx}=newA;
 
             newA = zeros(size(color_K));
             for k=1:size(color_K,2)
                 [val,ind] = sort(color_K(:,k),'descend');
                 newA(ind(1:knn),k) = val(1:knn);
             end
-            AC{j,i} = newA';                
+            ACDI{idx} = newA';                
         end
     end
+    tic
+    for idx=1:numSp
+        [i,j]=ind2sub(idx,forSp)
+        if i>=j
+            AC{i,j} = ACD{idx};
+            AC{j,i} = ACDI{idx}
+        end
+    end
+    disp(['Data transfer'])
+    toc
+
 end
 toc
 
