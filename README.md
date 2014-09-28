@@ -5,11 +5,11 @@ RecipeWatch is exploring concepts from youtube videos with no supervision. Proje
 - [Web Crawler](#web-crawler): A python script search youtube and wikihow and dowload videos with their subtitles if available.
 - [PreProcessing](#pre-processing): A preprocessing pipeline
 - [Vision Module](#vision-module): An unsupervised object clustering, feature extraction system.
-- [Representation Module](#representation-module): An unsupervised representational learning system.
+- [ML Module](#ml-module): An unsupervised representational learning system.
 - [Doc](#doc): Set of documents about the project including presentation, 5 minutes pitch and papers.
 
 
-##Pre Processing
+#Pre Processing
 
 #####Get the subtitles
 ```
@@ -39,10 +39,17 @@ pipeLine_cpmc.py                #Create the folder structure for cpmc code
 pipeLine_hist.py                #Create .mat file with the list of frames
 ```
 
-##Vision Module
+#Vision Module
 ```
 collectHistogram.m              #Run after cpmc is done to compute histograms
 cpmc_base/                      #Constrained parametric min-cut for object proposals
 CoProposals/                    #Code to generate co-object proposals. For the details look at the documentation
 ```
 
+#ML Module
+
+#Doc
+```
+ProjectLog/                      #Beamer presentation about the project
+ProjectPitch/                    #5 mins pitch of the project
+```
