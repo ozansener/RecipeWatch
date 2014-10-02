@@ -6,7 +6,7 @@ import pandas as pd
 
 
 def getArtificialProblem(DIM = 2,NumVisObjs = 10,NumLangObjs = 15,NumVIDS = 100,NumSTs = 20,plotting = False):
-  #Sample the subtask histograms
+  #Sample the subtask histograms from DP
   sv = np.random.dirichlet(0.1*np.ones([NumVisObjs,]), NumSTs)
   sl = np.random.dirichlet(0.1*np.ones([NumLangObjs,]), NumSTs)
 
