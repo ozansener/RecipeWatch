@@ -1,0 +1,10 @@
+{% if vid_list %}
+    <ul>
+    {% for vid in vid_list %}
+        <iframe width="854" height="510" src="//www.youtube.com/embed/{{ vid.link  }}" frameborder="0" allowfullscreen></iframe>
+        <li><a href="{{ vid.link }}">{{ vid.q }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No videos are available.</p>
+{% endif %}
