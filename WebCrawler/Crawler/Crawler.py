@@ -41,11 +41,11 @@ class Crawler:
             elif search_result["id"]["kind"] == "youtube#playlist":
                 playlists.append("%s (%s)" % (search_result["snippet"]["title"],
                                               search_result["id"]["playlistId"]))
-    
+
         #print "Videos:\n", "\n".join(videos), "\n"
         #print "Channels:\n", "\n".join(channels), "\n"
         #print "Playlists:\n", "\n".join(playlists), "\n"
-       
+
         return vid_ids
 
 

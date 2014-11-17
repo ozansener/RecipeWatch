@@ -1,5 +1,6 @@
 % DO NOT COMPILE THIS FILE DIRECTLY!
 % This is included by the the driver file (FlipBeamerTemplate.tex).
+\iffalse
 {
 \setbeamertemplate{footline}{} 
 \setbeamertemplate{sidebar right}{\llap{\includegraphics[width=\paperwidth,height=\paperheight]{BG_upper}}}
@@ -10,6 +11,8 @@
 \addtocounter{framenumber}{-1}
 
 }
+
+\fi
 
 \begin{frame}{Teaching Robots How to (Cook/Clean/Fix household items)}
 
@@ -61,6 +64,138 @@
 			\end{itemize}
 			}
 \end{frame}
+
+\begin{frame}{Preliminary Set-up}
+\includegraphics[width=\textwidth]{abc}
+\end{frame}
+
+
+\begin{frame}{Video Object Co-Proposal - Keysegments}
+\begin{itemize}
+\item Extension of the \emph{Category Independent Object Proposals} to video setting.
+\item Basically scoring each region with saliency and motion features. Express similarities as distance of unnormalized histograms. Then, finding the best cluster by using spectral graph clustering. $\max \frac{u^TAu}{u^Tu}$
+\item There is no trivial extension to multi-video case
+\begin{itemize}
+\item If we separately process each video, there are lots of environment specific objects.
+\item If we concatenate all object proposals from all videos; there is a serious problem of computational complexity and the result might not be the common object in all videos.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Multi Video Co-Keysegments}
+Solving $\max \sum_{i} \frac{u_i^TA_iu_i}{u_i^Tu_i} + \sum_{i}\sum_{j} \frac{u_i^TA_{ij}u_j}{u_i^T \mathds{1} \mathds{1}^Tu_j}$
+\begin{itemize}
+\item Tractable if we restrict video relations to k-nn graph.
+\end{itemize}
+Proposed Algorithm:
+\begin{itemize}
+\item Crate k-nn graph by using language distance between video descriptions over Youtube.
+\item Solve $\max \sum_{i} \frac{u_i^TA_iu_i}{u_i^Tu_i} + \sum_{i}\sum_{j} \frac{u_i^TA_{ij}u_j}{u_i^T \mathds{1} \mathds{1}^Tu_j}$
+\end{itemize}
+
+{\bf Intuitive Explanation:} \\
+Maximize the normalized cut and average fit within cluster entries
+
+\end{frame}
+
+
+
+\begin{frame}{\vspace{-8mm}\\ Solving $\max \sum_{i} \frac{u_i^TA_iu_i}{u_i^Tu_i} + \sum_{i}\sum_{j} \frac{u_i^TA_{ij}u_j}{u_i^T \mathds{1} \mathds{1}^Tu_j}$}
+
+{\bf Good news:}
+\begin{itemize}
+\item Energy function is quasi-convex.
+\item If we fixed the coordinate, it is quasi-linear.
+\item It can be optimized by using sub-gradient method.
+\end{itemize}
+
+{\bf Gradient is}: \\
+\[
+\nabla_{u_i} = \frac{2A_i u_i -2u_ir^1(u_i)}{u_i^Tu_i} + \sum_j \frac{1}{u_i^T \mathds{1} \mathds{1}^T u_j} \left( A_{i,j}u_j - u_j^T \mathds{1} r^2(i,j) \right)
+\]
+
+\end{frame}
+
+
+
+\begin{frame}{Representing Recipes}
+Any recipe can be represented as admissible set of sub-tasks, their ordering requirements and their co-occurrence properties.
+\end{frame}
+
+
+\begin{frame}{Observation}
+\begin{itemize}
+\item Let's denote set of visual objects as $v_0 \ldots v_{M^v}$ and language words as $l_0 \ldots l_{M^l}$.
+\item We define Co-Not-Occurrence requirements over a matrices $C^{NO,v}$ and $C^{NO,l}$ as $C^{NO,v}_{i,j} =1$ if $v_i$ and $v_j$ do not occur together. For example, the partial matrix for poaching egg case:
+\end{itemize}
+\[
+ \begin{array}{ccccccc} 
+&\rotatebox{90}{Water} & \rotatebox{90}{Pan} & \rotatebox{90}{Tap} & \rotatebox{90}{Gelatin} & \rotatebox{90}{Poacher} & \rotatebox{90}{Cup} \\ 
+\text{Water} &  & 0 & 0 & 0 & 0 & 0 \\
+\text{Pan} & 0 &  & 0 & 0 & 0 & 0 \\
+\text{Tap} & 0 & 0 &  & 0 & 0 & 0 \\
+\text{Gelatin} & 0 & 0 & 0 &  & 1 & 1 \\
+\text{Poacher} & 0 & 0 & 0 & 1 &  & 1 \\
+\text{Cup} & 0 & 0 & 0 & 1 & 1 & 
+\end{array} 
+\]
+\end{frame}
+
+\begin{frame}{Model}
+\begin{itemize}
+%\item $C^{NO,.}$ is sparse
+\item $C^{NO,.}$ is symmetric
+%\item If $C^{NO,.}_{i,j}=1$, $C^{No,.}_{i,:}$ is similar to  $C^{No,.}_{j,:}$. Since, they can be replaced.
+\item We can relax the ${0,1}$ to $[0,1]$ and obtain the matrix from the observed data.
+\end{itemize}
+In order to obtain the sub-task co-not-occurrence,
+\begin{itemize}
+\item Given visual histogram $x^v_0 \ldots x^v_K \in R^{M^v}$ and language histogram $x^l_0 \ldots x^l_K \in R^{M^l}$ of sub-tasks, we can sample co-not-occurrence set $\mathcal{C} \subset [0\ldots K]
+ \times [0 \ldots K]$ as;
+\begin{itemize}
+\item $P((i,j) \in \mathcal{C}) \sim {x^v_i}^T C^{NO,v} x^v_j + {x^l_i}^T C^{NO,l} x^l_j$
+\end{itemize} 
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Model}
+Similarly for ordering, we also model it over the extracted visual and language words.
+\begin{itemize}
+\item We define ordering requirements over a matrices $C^{OR,v}$ and $C^{OR,l}$ as $C^{OR,v}_{i,j} =1$ if $v_i$ has to occur after $v_j$. For example, the partial matrix for poaching egg case:
+\end{itemize}
+\[
+ \begin{array}{ccccccc} 
+&\rotatebox{90}{Water} & \rotatebox{90}{Pan} & \rotatebox{90}{Tap} & \rotatebox{90}{Gelatin} & \rotatebox{90}{Poacher} & \rotatebox{90}{Cup} \\ 
+\text{Water} &  & 1 & 1 & 0 & 0 & 0 \\
+\text{Pan} & 0 &  & 0 & 0 & 0 & 0 \\
+\text{Tap} & 0 & 0 &  & 0 & 0 & 0 \\
+\text{Gelatin} & 1 & 1 & 1 &  & 0 & 0 \\
+\text{Poacher} & 1 & 1 & 1 & 0 &  & 0 \\
+\text{Cup} & 0 & 0 & 0 & 0 & 0 & 
+\end{array} 
+\]
+\end{frame}
+
+\begin{frame}{Model}
+\begin{itemize}
+%\item $C^{OR,.}$ is sparse
+\item Either $C^{OR,.}_{i,j}=1$ and $C^{OR,.}_{j,i}=0$ or $C^{OR,.}_{i,j}=0$ and $C^{OR,.}_{j,i}=0$
+\item Although it looks quadratic; by keeping an extra observation vector, data can be computed in linear time.
+\item We can relax the ${0,1}$ to $[0,1]$ and obtain the matrix from the observed data.
+\end{itemize}
+In order to obtain the sub-task ordering,
+\begin{itemize}
+\item Given visual histogram $x^v_0 \ldots x^v_K \in R^{M^v}$ and language histogram $x^l_0 \ldots x^l_K \in R^{M^l}$ of sub-tasks, we can sample ordering set $\mathcal{C} \subset [0\ldots K]
+ \times [0 \ldots K]$ as;
+\begin{itemize}
+\item $P((i,j) \in \mathcal{C}) \sim {x^v_i}^T C^{OR,v} x^v_j + {x^l_i}^T C^{OR,l} x^l_j$
+\end{itemize} 
+\end{itemize}
+\end{frame}
+
+
+\iffalse 
 
 \begin{frame}{How to Understand Large-Scale Recipes}
 
@@ -418,10 +553,10 @@ Any recipe can be represented as admissible set of sub-tasks, their ordering req
 \begin{frame}{Co-occurrence}
  Using co-occurrence has problems like:
 \begin{itemize}
-\item Co-occurrence is generally modelled to be transitive, but within the recipes they are not. For example, (boiling, using a poacher) and (boiling, using a cup to poach) co-occurs while poaching an egg; but, (using a poacher, using a cup to poach)
+\item Co-occurrence is generally modelled to be transitive, but within the recipes they are not. For example, (boiling, using a poacher) and (boiling, using a cup to poach) co-occurs while poaching an egg; but, (using a poacher, using a cup to poach) never occurs.
 \item Number of admissible co-occurrence is high; hence, we need more data.
 \end{itemize}
-Hence, we need to mode {\bf co-not-occurrence} for sparsity and intuitive understanding.
+Hence, we need to model {\bf co-not-occurrence} for sparsity and intuitive understanding.
 \end{frame}
 
 \begin{frame}{Ordering}
@@ -470,3 +605,58 @@ In order to obtain the sub-task co-not-occurrence,
 \end{itemize} 
 \end{itemize}
 \end{frame}
+
+
+\begin{frame}{Model}
+Similarly for ordering, we also model it over the extracted visual and language words.
+\begin{itemize}
+\item We define ordering requirements over a matrices $C^{OR,v}$ and $C^{OR,l}$ as $C^{OR,v}_{i,j} =1$ if $v_i$ has to occur after $v_j$. For example, the partial matrix for poaching egg case:
+\end{itemize}
+\[
+ \begin{array}{ccccccc} 
+&\rotatebox{90}{Water} & \rotatebox{90}{Pan} & \rotatebox{90}{Tap} & \rotatebox{90}{Gelatin} & \rotatebox{90}{Poacher} & \rotatebox{90}{Cup} \\ 
+\text{Water} &  & 1 & 1 & 0 & 0 & 0 \\
+\text{Pan} & 0 &  & 0 & 0 & 0 & 0 \\
+\text{Tap} & 0 & 0 &  & 0 & 0 & 0 \\
+\text{Gelatin} & 1 & 1 & 1 &  & 0 & 0 \\
+\text{Poacher} & 1 & 1 & 1 & 0 &  & 0 \\
+\text{Cup} & 0 & 0 & 0 & 0 & 0 & 
+\end{array} 
+\]
+\end{frame}
+
+\begin{frame}{Model}
+\begin{itemize}
+\item $C^{OR,.}$ is sparse
+\item Either $C^{OR,.}_{i,j}=1$ and $C^{OR,.}_{j,i}=0$ or $C^{OR,.}_{i,j}=0$ and $C^{OR,.}_{j,i}=0$
+\item Although it looks quadratic; by keeping an extra observation vector, data can be computed in linear time.
+\item We can relax the ${0,1}$ to $[0,1]$ and obtain the matrix from the observed data.
+\end{itemize}
+In order to obtain the sub-task ordering,
+\begin{itemize}
+\item Given visual histogram $x^v_0 \ldots x^v_K \in R^{M^v}$ and language histogram $x^l_0 \ldots x^l_K \in R^{M^l}$ of sub-tasks, we can sample ordering set $\mathcal{C} \subset [0\ldots K]
+ \times [0 \ldots K]$ as;
+\begin{itemize}
+\item $P((i,j) \in \mathcal{C}) \sim {x^v_i}^T C^{OR,v} x^v_j + {x^l_i}^T C^{OR,l} x^l_j$
+\end{itemize} 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Generative Model}
+\begin{itemize}
+\item Sample number of sub-activities $K$ from prior.
+\item Sample $K$ cluster centers from language words and visual objects spaces.
+\item By using clusters, sample co-not occurrence and co-order matrices from $P(P((i,j) \in \mathcal{C})|x^v_i,x^l_i)$
+\item By using co-not occurrence and co-order matrices, sample a graph.
+\item From a graph, sample a path for the video and sample a sub-graph for WikiHow entry.
+\end{itemize}
+\end{frame}	
+
+\begin{frame}{Questions to Answer}
+\begin{itemize}
+\item Optimization functions to find the matrices.
+\item Details of the generative model.
+\end{itemize}
+\end{frame}	
+
+\fi

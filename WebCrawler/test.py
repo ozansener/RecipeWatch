@@ -7,7 +7,3 @@ for vi in VIDS:
     print vi
     os.system('java -cp Subtitle.jar:commons-io-2.4.jar:jdom.jar Ozan https://www.youtube.com/watch?v='+vi+' '+'./'+vi+'.txt')
     #os.system('youtube-dl http://www.youtube.com/watch?v='+vi)
-
-
-
-

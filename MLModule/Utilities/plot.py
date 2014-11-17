@@ -55,6 +55,7 @@ def plotSetOfArrays(arrays,names,fileName):
   line(IDS, arrays[1][:,0], color='#1F78B4', legend=names[1])
   line(IDS, arrays[2][:,0], color='#B2DF8A', legend=names[2])
   line(IDS, arrays[3][:,0], color='#33A02C', legend=names[3])
+  line(IDS, arrays[4][:,0], color='#fb9a99', legend=names[4])
 
   curplot().title = "Minimum IOU"
   grid().grid_line_alpha=0.3

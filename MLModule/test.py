@@ -7,6 +7,8 @@ from scipy.cluster.vq import vq,kmeans,whiten
 
 from ArtificialExample import generateData
 from Utilities import score,plot
+import CTMC
+
 
 CR = '\033[91m'
 CG = '\033[92m'
@@ -34,12 +36,24 @@ def ApplyKMeansToProblem(Problem,K,Plotit=False,FileName=''):
     plot.saveAverageVideo(idS,mns,Problem['Videos'],FileName)
   return Dat,GT,idS
 
+def main2(argv):
+  ProblemN = generateData.getArtificialProblem(10,15,100,20,0.1,False,'gt_withNoise.pdf');
+  StateTransitionProbs = np.zeros((20,20))
+  sumL = ProblemN['VideoLength'][0];
+  TREJ = CTMC.getRandomTrajectory(ProblemN['CoNotOccur'],ProblemN['CoNotOrder'],ProblemN['Durations'],ProblemN['VideoLength'][0])
+  for i in range(1,100):
+    trejD = CTMC.getRandomTrajectory(ProblemN['CoNotOccur'],ProblemN['CoNotOrder'],ProblemN['Durations'],ProblemN['VideoLength'][i])
+    TREJ = np.concatenate((TREJ,trejD),axis=1)
+    sumL=sumL+ProblemN['VideoLength'][i]
+  #print TREJ.shape,sumL
+  #reshape(sumL,)
 
 def main(argv):
   min_iou_kmeans = np.zeros((100,1))
   min_iou_kmeans_w = np.zeros((100,1))
   min_iou_oc = np.zeros((100,1))
   min_iou_rand = np.zeros((100,1))
+  min_iou_rand_ctmc = np.zeros((100,1))
 
   for (i,er) in enumerate(np.linspace(0,10,100)):
     print 'STEP:',i,er
@@ -55,13 +69,31 @@ def main(argv):
     idS,_ = vq(Dat,np.concatenate((ProblemN['VisualMeans'],ProblemN['LanguageMeans']),axis=1))
     o_sc = score.getMinIou(GT,idS,ProblemN['VideoLength'])
     #print CG+ 'Oracle Score with noise(0.3):'+str()+CEN
+
+    #
+    #
+    #
+    StateTransitionProbs = np.zeros((20,20))
+    sumL = ProblemN['VideoLength'][0];
+    TREJ = CTMC.getRandomTrajectory(ProblemN['CoNotOccur'],ProblemN['CoNotOrder'],ProblemN['Durations'],ProblemN['VideoLength'][0])
+    for ii in range(1,100):
+      trejD = CTMC.getRandomTrajectory(ProblemN['CoNotOccur'],ProblemN['CoNotOrder'],ProblemN['Durations'],ProblemN['VideoLength'][ii])
+      TREJ = np.concatenate((TREJ,trejD),axis=1)
+      sumL=sumL+ProblemN['VideoLength'][ii]
+    #
+    #
+    #
+    rctmct_sc = score.getMinIou(GT,TREJ,ProblemN['VideoLength'])
+
+
     r_sc = score.getMinIou(GT,np.random.randint(0,19,size=len(GT[:,0])),ProblemN['VideoLength'])
     #print CG+ 'Random IOU Score:'+str(r_sc)+CEN
     min_iou_kmeans[i,0]=sc
     min_iou_kmeans_w[i,0]=sc_w
     min_iou_oc[i,0]=o_sc
     min_iou_rand[i,0]=r_sc
-  plot.plotSetOfArrays((min_iou_kmeans,min_iou_kmeans_w,min_iou_oc,min_iou_rand),['K-Means w/ Correct K','K-Means','Vector Quant','Random'],'error.png')
+    min_iou_rand_ctmc[i,0] =rctmct_sc
+  plot.plotSetOfArrays((min_iou_kmeans,min_iou_kmeans_w,min_iou_oc,min_iou_rand,min_iou_rand_ctmc),['K-Means w/ Correct K','K-Means','Vector Quant','Random','Random CTMC'],'error.png')
 
 if __name__ == "__main__":
   main(sys.argv[1:])
