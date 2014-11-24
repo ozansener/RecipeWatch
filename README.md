@@ -2,18 +2,24 @@ RecipeWatch
 ===========
 RecipeWatch is exploring concepts from youtube videos with no supervision. Project is composed of following sub-modules:
 
-- [Web Crawler](#web-crawler): A python script search youtube and wikihow and dowload videos with their subtitles if available.
+- [src/Crawler](#web-crawler): A python module which can search youtube and wikihow and download videos with their subtitles if available.
+- [src/Settings](#settings): Set of parameters and settings used by the entire project. It also includes ModalDB schema etc.
+- [Scripts](#scripts): Python scripts mostly for data crunching/processing.
+- [Doc](#doc): Documents about the project including presentation, 5 minutes pitch and papers.
+
+
+
+
+
 - [PreProcessing](#pre-processing): A preprocessing pipeline
 - [Vision Module](#vision-module): An unsupervised object clustering, feature extraction system.
 - [ML Module](#ml-module): An unsupervised representational learning system.
-- [Doc](#doc): Set of documents about the project including presentation, 5 minutes pitch and papers.
 
 
 #Pre Processing
 
 #####Get the subtitles
 ```
-pipeLine_srt.py                 Get the subtitle of the youtube videos
 pipeLine_extractSrt.py          Read the SRT/*.srt files and crete python dict
 ```
 
