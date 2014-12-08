@@ -1,0 +1,105 @@
+\documentclass{article}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bm}
+% numbers option provides compact numerical references in the text.
+\usepackage[numbers]{natbib}
+\usepackage{multicol}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage[it,small]{caption}
+\usepackage{subcaption}
+\usepackage{dsfont}
+\newcommand{\argmax}{\operatorname{arg\,max}}
+\newcommand{\argmin}{\operatorname{arg\,min}}
+
+\newcommand{\todo}[1]{\textcolor{blue}{\textbf{#1}}}
+
+\newtheorem{example}{\hspace*{-1em}\textbf{Example}}
+
+\title{Unsupervised Learning of Recipes from Large-Scale Multi-Modal Data}
+
+\begin{document}
+\maketitle
+\section{Derivation of Non-Parametric Bayesian Model}
+We consider large collection of videos and text recipes in order to learn recipes. In the initial setup, we consider the problem of jointly learning a single recipe from multiple videos and text inputs. We consider the following setup;
+\begin{itemize}
+  \item $N$ videos as $V_1,\ldots,V_N \quad s.t. \quad  V_k^i$ is $i^{th}$ frame of $k^{th}$ video (with subtitle)
+  \item $M$ text recipes as $L_1,\ldots,L_M \quad  s.t. \quad  L_k^i$ is $i^{th}$ step of $k^{th}$ recipe
+\end{itemize}
+Moreover, we formulate our system on set of quantized visual objects and salient words. We consider;
+\begin{itemize}
+  \item $v_N$ visual objects as $w^v_1,\ldots,w^v_{v_N}$
+  \item $l_N$ salient words as $w^l_1,\ldots,w^l_{l_N}$
+\end{itemize}
+As a latent concept, we consider;
+\begin{itemize}
+  \item $K$ Actions as $\theta_1,\ldots,\theta_K \quad s.t. \quad \theta_i \in \left(\underbrace{\{0,1\}}_{occ.}\times LM\right)^{v_N} \times [0,1]^{l_N} \times \underbrace{R}_{av.length}$
+  \item Feature matrix $F \quad s.t. \quad$ $F_{i,j}=1$ if $i^{th}$ video has the $j^{th}$ activity, $0 \quad o.w.$
+  \item Replecability Matrix $\quad R\quad s.t. \quad R_{i,j}=1$ if action $i$ and $j$ can be replaced
+  \item Order Matrix $\quad O\quad s.t. \quad O_{i,j}=1$ if action $i$ can not occure before $j$
+\end{itemize}
+where $LM$ is \emph{LocalMotionSpace}. Local motion is represented as multinomial distribution over the clusters of optical flow histograms. We further know that $R$ is a symetric matrix and $O_{i,j}=0$ if $O_{j,i}=1$.
+
+As a local latent concept per video, we have:
+\begin{itemize}
+  \item Local transition probabilities $\pi$ between activites.
+  \item Selected features $f_i$
+  \item Prior over transitions $\eta_i$
+  \item Note: $\pi|\eta_i,f_i,RO \sim Dir\left(RO \cdot(f_i \bigodot \eta_i)\right)$
+\end{itemize}
+
+Moreover, as a modelling assumption
+\begin{itemize}
+  \item $F$ follows a beta process as $BP(B_0,c)$
+  \item Videos follow HMM or CTMC
+\end{itemize}
+
+\begin{figure}
+  \includegraphics[width=\textwidth]{plate}
+\caption{Graphical Model of the Recipe Model}
+\end{figure}
+
+\section{Generative Description of the Model}
+\begin{enumerate}
+  \item We start with sampling Beta process realization $B\sim BP(c,B_0)$:
+  \begin{equation}
+    B = \sum_{k=1}^\infty w_k \theta_k \text{ where } \theta_k \sim B(w)^{v_N} \times Dir(\alpha)^{v_N} \times B(w)^{l_N} \times \Gamma(\cdot)
+  \end{equation}
+  \item We then sample co-not-occurance matrix through:
+  \begin{equation}
+    S^R = \Theta^T R \Theta  \rightarrow R = f(S) \bigodot M, M \sim  BeP(\cdot)
+  \end{equation}
+  \item We then sample ordering matrix similarly.
+  \item Then for each video;
+  \begin{itemize}
+    \item Draw $f_i$ from $B$
+    \item Draw transition functions $\pi_i \sim Dir(f_i \bigodot R \bigodot O \bigodot [\lambda,\ldots,\lambda])$
+    \item Draw state sequence $z$, $z_{t+1}|z_{t} \sim \pi_i$
+    \item Draw observations $y \sim Ber()\times MN() \times \exp(\lambda)$
+  \end{itemize}
+\end{enumerate}
+
+
+\section{MCMC Sampler}
+We need the following sampling routines:
+\subsection{Sample $\theta,\eta|z,R,O$}
+Given states and transition probabilities, $\theta$ and $\eta$ are conditionally independent. We sample them seperatly. Since all priors are conjugate, the sampling is easy.
+\subsection{Sample $F|\theta,R,O,\eta$}
+In order to sample shared features we use Metropolis–Hastings sampler by using IBP priors. One tricky part is computing observation likelihoods. For HMM case, it is basically forward-backward algorithm. For CTMC, ?.
+\subsection{Sample $z|F,\theta,R,O,\eta$}
+Sampling sequence of states given state transitions and observations can easily be accomplished via dynamic programming in HMM case. However; if we use CTMC,  designing an exact sampler is hard. Indeed, there is a way by using Bayes rule and impoartance sampling.
+\subsection{Sample $c,\alpha|F$}
+Classical HBP procedure by Fox et al\cite{fox}.
+\subsection{Sample $\lambda,R,O|F,z,\eta,\theta$}
+In order to sample $R,O$, we basically compute the sufficient statistics (current co-occurence and orders) and re-sample Bernouli random variables. For $\lambda$, ?.
+%\subsection{Sample $F$ from $IBP$}
+
+\section{Next Week(s) Plan}
+\begin{itemize}
+  \item Deriving full sampler by going into the details of the CTMC (1 Week).
+  \item Artificial data generation (already completed)
+  \item Implementing and debugging the algorithm on artificial data (1 Week).
+\end{itemize}
+\end{document}
