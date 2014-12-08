@@ -2,13 +2,13 @@
 \usetheme[
 	bullet=circle,		% Other option: square
 	%bigpagenumber,		% circled page number on lower right
-	topline=true,			% colored bar at the top of the frame 
+	topline=true,			% colored bar at the top of the frame
 	shadow=false,			% Shading for beamer blocks
 	%watermark=BG_lower,	% png file for the watermark
 	]{Flip}
 
 
-\newcommand{\titleimage}{title}			% Custom title 
+\newcommand{\titleimage}{title}			% Custom title
 \newcommand{\tanedo}{tanedolight}		% Custom author name
 \newcommand{\CMSSMDM}{CMSSMDMlight.png}	% light background plot
 \usepackage{dsfont}
@@ -18,7 +18,7 @@
 
 %% Default font: lmodern, doesn't require fontspec % solves some default warnings
 \usepackage[T1]{fontenc}
-\usepackage{lmodern}			
+\usepackage{lmodern}
 %\usepackage{sfmath}		% Sans Serif Math, off by default
 
 %% Protects fonts from Beamer screwing with them
@@ -29,17 +29,20 @@
 %% XeLaTeX fonts: (comment out if you don't use XeLaTeX)
 
 %% For advanced fonts: access local OS X fonts
-\usepackage[no-math]{fontspec}		
+\usepackage[no-math]{fontspec}
 %% This template uses typical OS X and Adobe fonts
 \defaultfontfeatures{Mapping=tex-text}	% This seems to be important for mapping glyphs properly
 
-\setmainfont{Gotham Book}			% Beamer ignores "main font" in favor of sans font
-\setsansfont{Gotham Book}			% This is the font that beamer will use by default
+\setmainfont[Color=primary, Path = ffunit/,BoldItalicFont=UnitSlabPro-BoldIta,BoldFont=UnitSlabPro-Bold,ItalicFont=UnitOT-LightIta]{UnitOT-Light}
+\setsansfont[Scale=MatchLowercase,Mapping=tex-text, Path = ffunit/]{UnitSlabPro-Light}
+
+%\setmainfont{Gotham Book}			% Beamer ignores "main font" in favor of sans font
+%\setsansfont{Gotham Book}			% This is the font that beamer will use by default
 % \setmainfont{Gill Sans Light}		% Prettier, but harder to read
 
-\setbeamerfont{title}{family=\fontspec{Gotham},size={\fontsize{32}{32}}}
+\setbeamerfont{title}{size={\fontsize{32}{32}}}
 \setbeamercolor{title}{fg=black}
-\setbeamerfont{author}{family=\fontspec{Gotham Thin},size={\fontsize{24}{26}}}
+\setbeamerfont{author}{size={\fontsize{24}{26}}}
 \setbeamercolor{author}{fg=darkcharcoal}
 %\setbeamerfont{frametitle}{family=\fontspec{Gotham Medium}}
 
@@ -113,7 +116,7 @@
 % \begin{frame}{test}
 % 	Main text still in Gill Sans
 % 	$$\frac{f}{f^4}$$
-% 	
+%
 % 	But math is now different
 % 	\Large
 % 	$$\frac{f^2}{f^4}$$
@@ -121,4 +124,3 @@
 
 
 \end{document}
-
