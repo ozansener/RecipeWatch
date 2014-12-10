@@ -10,9 +10,7 @@ class HMM:
     self.len = 0
     self.state = [{}]
     self.fnc={}
-  def viterbi(self):
-    #Return viterbi path
-    return 0
+
   def forwardBackward(self):
     #Run forward backward algorithm to compute ikelihoods
     return 0
@@ -43,6 +41,22 @@ class HMM:
     #It does not exist so appen
     self.alpha[i][nitem].append([self.P[item,nitem]*P0,PrevBin])
     return
+  def replaceIfValid(self,i,item,PrevBin,nitem,P0):
+    if nitem in self.s2T:
+      PrevBin[nitem,0]=1
+    for j,k in enumerate(self.alpha[i][nitem]):
+        v, = np.asarray((k[1]-PrevBin).T)
+        if not np.dot(v,v) > 0:
+          #Update probs
+          #pdb.set_trace()
+          if self.P[item,nitem]*P0 > self.alpha[i][nitem][j][0]:
+            self.alpha[i][nitem][j][0] = self.P[item,nitem]*P0
+            self.alpha[i][nitem][j][2] = item
+          return
+    #It does not exist so append
+    self.alpha[i][nitem].append([self.P[item,nitem]*P0,PrevBin,item])
+    return
+
   def obsProb(self,state,obs):
     return self.fnc['obs'](state,obs)
   def match(self,si,sie,si1,si1e):
@@ -115,3 +129,52 @@ class HMM:
     self.ForwardLoop()
     self.BackwardLoop()
     self.SmoothForwardBackward()
+
+
+  def viterbi(self):
+    EP = np.mat(np.zeros((self.dim,self.dim)))
+    if not self.s2T == []:
+      EP[self.s2T,self.s2T]
+    for i,y in enumerate(self.Y):
+      if i==0:
+        #Initial Probabilities
+        self.alpha=[[[[self.P0[p,0],EP[:,p],-1]] for p in range(self.dim)]]
+      else:
+        #Alpha update equation
+        self.alpha.append([[] for p in range(self.dim)])
+        for g in range(self.dim):
+          for prevSt in self.alpha[i-1][g]:
+            #Get all possible future states
+            for t in range(self.dim):
+              if (self.R[g,t]==0) and (not (self.O*(1-prevSt[1]))[t,0]>0) and self.P[g,t]>0:
+                #It is a valid transition
+                self.replaceIfValid(i,g,prevSt[1],t,prevSt[0])
+      for g in range(self.dim):
+        for mi,mk in enumerate(self.alpha[i][g]):
+          self.alpha[i][g][mi][0]=self.alpha[i][g][mi][0]*self.obsProb(g,self.Y[i])
+    #Get the solution
+    CP = -1
+    res =[]
+    for i in range(len(self.Y)-1,-1,-1):
+      CmX = 0
+      CiD = 0
+      if i == len(self.Y)-1:
+        for vI,vec in enumerate(self.alpha[i]):
+          for k in vec:
+            if k[0]>CmX:
+              CiD = vI
+              CmX = k[0]
+              CP = k[2]
+        res.append(CiD)
+        res.append(CP)
+      else:
+        vec = self.alpha[i][CP]
+        for k in vec:
+          if k[0]>CmX:
+            CiD = k[2]
+            CmX = k[0]
+            CP = k[2]
+        res.append(CP)
+    res.reverse()
+    return res[1:]
+    #print self.alpha

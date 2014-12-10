@@ -60,7 +60,10 @@ def fwd_bkw(x, states, a_0, a, e, end_st):
         posterior.append({st: fwd[i][st]*bkw[i][st]/p_fwd for st in states})
 
     assert p_fwd == p_bkw
-    return fwd, bkw, posterior
+    print posterior
+    print fwd
+    print bkw
+    return 0
 
 def example():
     return fwd_bkw(observations,
@@ -70,6 +73,4 @@ def example():
                    emission_probability,
                    end_state)
 
-for line in example():
-    print(' '.join(map(str, line)))
-    
+example()
