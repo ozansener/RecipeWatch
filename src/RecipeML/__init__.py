@@ -1,2 +1,3 @@
-__all__ = ['HMM']
+__all__ = ['HMM','NPBPSampler']
 from Hmm import HMM
+#from NPBPSampler import NPBPSampler
