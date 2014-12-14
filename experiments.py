@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 import Utilities.Evaluation as Evaluation
 import RecipeML.Baselines as Baseline
+from RecipeML import *
 import ArtificialData.generateData
 
 
@@ -23,6 +24,9 @@ GT = Problem['Videos'][0][2]
 for i in xrange(1,len(Problem['Videos'])):
   GT=np.concatenate((GT,Problem['Videos'][i][2]),axis=0)
 
+#Proposed Method
+bpR = NPBPSampler()
+bpR.runBPRecipe(Problem)
 
 #K-Means with good K
 Dat,idS = Baseline.ApplyKMeansToProblem(Problem,20)
@@ -35,7 +39,7 @@ for dummy in xrange(50):
 print scGoodK,scBadK/50
 
 #Compute F
-#Compute 
+#Compute
 #            #
 #            #
 #            #
@@ -46,3 +50,5 @@ print scGoodK,scBadK/50
 #K-Means + HMM
 #Oracle: Correct TranP,StateMeans,Wrong, CoNot
 #Oracle^2: Correct TranP,StateMeans, CoNot
+
+# return {'Durations':Dur,'CoNotOccur':CNCor,'CoNotOrder':CNOr,'VisualMeans':sv,'LanguageMeans':sl,'Videos':VidL,'VideoLength':vidLengths}
