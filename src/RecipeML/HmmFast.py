@@ -24,7 +24,6 @@ class HMMFast:
                 prev_f_sum = sum(self.alpha[i-1,k]*self.P[k,st] for k in range(self.dim))
 
             self.alpha[i,st]=prev_f_sum*self.obsProb(st,self.Y[i])
-
   def BackwardPass(self):
     L = self.len
     self.beta = np.zeros((self.len,self.dim))
@@ -74,12 +73,26 @@ class HMMFast:
     self.Post = np.mat(np.zeros((self.dim,len(self.Y))))
     for i,y in enumerate(self.Y):
       for g in range(self.dim):
-        pSum = 0
-        aSum = 0
-        bSum = 0
         self.Post[g,i]=self.alpha[i,g]*self.beta[i,g]
     row_sums = self.Post.sum(axis=0)
+    if np.any(row_sums==0):
+      print 'RS',row_sums
+      print 'PS',self.Post
+      print 'PP',self.P
+
     self.Post = self.Post / row_sums
+
+
+  def GetProbApprox(self):
+    #self.alpha will hold the final posterior
+    self.Post = np.mat(np.zeros((self.dim,len(self.Y))))
+    for i,y in enumerate(self.Y):
+      for g in range(self.dim):
+        self.Post[g,i]= self.obsProb(g,self.Y[i])
+    row_sums = self.Post.sum(axis=0)
+    self.Post = self.Post / row_sums
+    return self.Post
+
   def runSmoothing(self):
     self.ForwardPass()
     self.BackwardPass()

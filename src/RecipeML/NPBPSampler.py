@@ -15,12 +15,12 @@ class NPBPSampler:
   def __init__(self):
     self.c0 = 1
   def sampleEta(self):
-    self.eta = [np.mat(np.zeros((self.F.shape[1],self.F.shape[1]))) for k in xrange(len(self.videos))]
+    #self.eta = [np.mat(np.zeros((self.F.shape[1],self.F.shape[1]))) for k in xrange(len(self.videos))]
     #We will sample eta for each videos
     for numV,vid in enumerate(self.videos):
     #Start with collecting the sufficient statistics
       tranMat = np.ones((self.F.shape[1],self.F.shape[1]))*self.lamb
-      tranMat[np.diag_indices(self.F.shape[1])]=self.kappa
+      tranMat[np.diag_indices(self.F.shape[1])]=self.kappa+self.lamb
       for i in range(len(vid)-1):
         tranMat[vid[i]['state'],vid[i+1]['state']] = tranMat[vid[i]['state'],vid[i+1]['state']] + 1
 
@@ -41,11 +41,13 @@ class NPBPSampler:
     etaP = np.mat(np.zeros((F.shape[1],F.shape[1])))
     #Start with collecting the sufficient statistics
     tranMat = np.ones((F.shape[1],F.shape[1]))*self.lamb
-    tranMat[np.diag_indices(F.shape[1])]=self.kappa
-    #for vid in self.videos:
-    vid = self.videos[sq]
-    for i in range(len(vid)-1):
-      tranMat[vid[i]['state'],vid[i+1]['state']] = tranMat[vid[i]['state'],vid[i+1]['state']] + 1
+    tranMat[np.diag_indices(F.shape[1])]=self.kappa+self.lamb
+    for vid in self.videos:
+    #vid = self.videos[sq]
+      for i in range(len(vid)-1):
+        if vid[i]['state']>=F.shape[1] or vid[i+1]['state']>=F.shape[1]:
+          continue
+        tranMat[vid[i]['state'],vid[i+1]['state']] = tranMat[vid[i]['state'],vid[i+1]['state']] + 1
 
     #Get only the selected features
     i,j=F[sq,:].nonzero()
@@ -71,6 +73,8 @@ class NPBPSampler:
     countLStatistics = np.mat(np.zeros((F.shape[1],self.numLangObjs)))
     for vid in self.videos:
       for frame in vid:
+        if frame['state']>=F.shape[1]:
+          continue
         countStates[0,frame['state']]+=1
         countVStatistics[frame['state'],:]+=frame['obsV']
         countLStatistics[frame['state'],:]+=frame['obsL']
@@ -86,12 +90,12 @@ class NPBPSampler:
     #Sample the beta varaible
     for k in range(F.shape[1]):
       for j in  range(self.numVidObjs):
-        propStates['v'][0][k,j]=(self.alpha0+countVStatistics[k,j])/(self.alpha0+countVStatistics[k,j]+self.beta0+(countStates[0,k]-countVStatistics[k,j]))
+        propStates['v'][0][k,j]=(self.alpha0+countVStatistics[k,j])/(self.alpha0+self.beta0+countStates[0,k])
 
     #2nd sample language occurances
     for k in range(F.shape[1]):
       for j in range(self.numLangObjs):
-        propStates['l'][0][k,j]=(self.alpha0+countLStatistics[k,j])/(self.alpha0+countLStatistics[k,j]+self.beta0+(countStates[0,k]-countLStatistics[k,j]))
+        propStates['l'][0][k,j]=(self.alpha0+countLStatistics[k,j])/(self.alpha0+self.beta0+countStates[0,k])
 
     return propStates
 
@@ -132,21 +136,43 @@ class NPBPSampler:
         tP[k,:]=self.eta[sq][k,:]/float(np.sum(self.eta[sq][k,:],1))
     #seq1 = HMM(dimension)
     seq2 = HMMFast(dimension)
-    op= lambda x,y: (y['obsV'][0]*self.states['v'][0][x,0] + (1-y['obsV'][0])*(1-self.states['v'][0][x,0]))*(y['obsV'][1]*self.states['v'][0][x,1] + (1-y['obsV'][1])*(1-self.states['v'][0][x,1]))
-    #*(y['obsL'][1]*self.states['l'][0][x,1] + (1-y['obsL'][1])*(1-self.states['v'][0][x,1]))*(y['obsL'][0]*self.states['l'][0][x,0] + (1-y['obsL'][0])*(1-self.states['l'][0][x,0]))
+    op= lambda x,y: (y['obsV'][0]*self.states['v'][0][x,0] + (1-y['obsV'][0])*(1-self.states['v'][0][x,0]))*(y['obsV'][1]*self.states['v'][0][x,1] + (1-y['obsV'][1])*(1-self.states['v'][0][x,1]))*(y['obsL'][0]*self.states['l'][0][x,0] + (1-y['obsL'][0])*(1-self.states['l'][0][x,0]))*(y['obsL'][1]*self.states['l'][0][x,1] + (1-y['obsL'][1])*(1-self.states['l'][0][x,1]))
     pi0 = np.mat(np.ones((dimension,1)))/float(dimension)
-    #print 'POS',tP,pi0
-    #seq1.setProblem(np.zeros((dimension,dimension)),np.zeros((dimension,dimension)),tP,pi0,100,self.videos[seqId],op)
-    #ts = time.time()
-    #seq1.runSmoothing()
-    #te = time.time()
-    #POST =  seq1.getPosterior()
+    #print 'KKK',tP,pi0,dimension,self.states
     seq2.setProblem(np.zeros((dimension,dimension)),np.zeros((dimension,dimension)),tP,pi0,len(self.videos[sq]),self.videos[sq],op)
     POST =  seq2.getSample()
     for t in range(len(self.videos[sq])):
       self.videos[sq][t]['state']=POST[t]
 
     return POST
+
+  def getHMMObsLogProbApprox(self,seqId,tranP,statesP):
+    #Write this
+    dimension = tranP.shape[0]
+    tP = np.mat(np.zeros((dimension,dimension)))
+    for k in range(dimension):
+      if np.sum(tranP[k,:],1)>0:
+        tP[k,:]=tranP[k,:]/float(np.sum(tranP[k,:],1))
+    #seq1 = HMM(dimension)
+    seq2 = HMMFast(dimension)
+
+    op= lambda x,y: (y['obsV'][0]*statesP['v'][0][x,0] + (1-y['obsV'][0])*(1-statesP['v'][0][x,0]))*(y['obsV'][1]*statesP['v'][0][x,1] + (1-y['obsV'][1])*(1-statesP['v'][0][x,1]))
+    pi0 = np.mat(np.ones((dimension,1)))/float(dimension)
+
+    seq2.setProblem(np.zeros((dimension,dimension)),np.zeros((dimension,dimension)),tP,pi0,len(self.videos[seqId]),self.videos[seqId],op)
+    POST =  seq2.GetProbApprox()
+
+    logP = 0
+    pstG = 0
+    for t in range(len(self.videos[seqId])):
+      pst=0
+      for k in range(dimension):
+        pst+=POST[k,t]*op(k,self.videos[seqId][t])
+      pstG += np.log(pst)
+    #print pstG
+    #print 'TP',tP,pi0,pstG
+    return pstG
+
   def getHMMObsLogProb(self,seqId,tranP,statesP):
     #Write this
     dimension = tranP.shape[0]
@@ -160,12 +186,7 @@ class NPBPSampler:
     op= lambda x,y: (y['obsV'][0]*statesP['v'][0][x,0] + (1-y['obsV'][0])*(1-statesP['v'][0][x,0]))*(y['obsV'][1]*statesP['v'][0][x,1] + (1-y['obsV'][1])*(1-statesP['v'][0][x,1]))
     #*(y['obsL'][1]*self.states['l'][0][x,1] + (1-y['obsL'][1])*(1-self.states['v'][0][x,1]))*(y['obsL'][0]*self.states['l'][0][x,0] + (1-y['obsL'][0])*(1-self.states['l'][0][x,0]))
     pi0 = np.mat(np.ones((dimension,1)))/float(dimension)
-    #print 'POS',tP,pi0
-    #seq1.setProblem(np.zeros((dimension,dimension)),np.zeros((dimension,dimension)),tP,pi0,100,self.videos[seqId],op)
-    #ts = time.time()
-    #seq1.runSmoothing()
-    #te = time.time()
-    #POST =  seq1.getPosterior()
+
 
     seq2.setProblem(np.zeros((dimension,dimension)),np.zeros((dimension,dimension)),tP,pi0,len(self.videos[seqId]),self.videos[seqId],op)
     #ts2 = time.time()
@@ -193,13 +214,14 @@ class NPBPSampler:
     for sq in range(N):
       (N,K) = self.F.shape
       featCount = np.sum(self.F,axis=0)
+      vidCount = np.sum(self.F,axis=1)
       uniqueL=[]
       for kk in range(K):
         if featCount[0,kk]==1 and self.F[sq,kk]==1:
           uniqueL.append(kk)
       #print 'A',self.F,sq,uniqueL
       #return
-      if (len(uniqueL)==0 or np.random.rand()>0.5) and (K<8):
+      if (len(uniqueL)==0 or np.random.rand()>0.6) and (K<80):
         #Birth
         #First choose data driven window length
         vid = self.videos[sq]
@@ -211,7 +233,7 @@ class NPBPSampler:
         EtaOld  = self.mlEta(sq,self.F)
         ThetaOld = self.mlTheta(sq,0,0,self.F,-1)
 
-        oldProb = self.getHMMObsLogProb(sq,EtaOld,ThetaOld)+self.calcLogProbF()
+        oldProb = self.getHMMObsLogProb(sq,EtaOld,ThetaOld)
 
         F = np.concatenate((self.F,np.zeros((self.F.shape[0],1))),axis=1)
         F[sq,self.F.shape[1]]=1
@@ -219,30 +241,69 @@ class NPBPSampler:
         ThetaNew = self.mlTheta(sq,startP,startP+leng+1,F,self.F.shape[1])
 
 
-        newProb  = self.getHMMObsLogProb(sq,EtaNew,ThetaNew)+self.calcLogProbF(F,1)
-        if newProb - oldProb  > np.log(np.random.rand()):
+        newProb  = self.getHMMObsLogProb(sq,EtaNew,ThetaNew)
+        etaa = self.gamma *1.0/(1.0 + 5.0 -1.0 );
+        logPrNumFeat_Diff = ( 1 )*np.log( etaa ) +  sp.special.gammaln( F.shape[1] ) - sp.special.gammaln( F.shape[1] + 1 );
+        if newProb - oldProb + logPrNumFeat_Diff > np.log(min(np.random.rand()+0.1,1)):
           self.F = F
-          self.eta[sq]=EtaNew
-          self.states = ThetaNew
+          #self.eta[sq]=EtaNew
+
+          #self.states = ThetaNew
+          #print self.states['v'][0].shape,ThetaNew['v'][0][-1,:].shape
+          self.states['v'][0]=np.concatenate((self.states['v'][0],ThetaNew['v'][0][-1,:]),axis=0)
+          self.states['l'][0]=np.concatenate((self.states['l'][0],ThetaNew['v'][0][-1,:]),axis=0)
+
+          self.eta[sq]=np.concatenate((self.eta[sq],EtaNew[:-1,-1]),axis=1)
+          self.eta[sq]=np.concatenate((self.eta[sq],EtaNew[-1,:]),axis=0)
+
+          #Update the next ones
+          L1 =range(len(self.videos))
+          L1.remove(sq)
+          for vi in L1:
+            self.eta[vi]=np.concatenate((self.eta[vi],np.zeros((self.eta[vi].shape[0],1))),axis=1)
+            self.eta[vi]=np.concatenate((self.eta[vi],np.zeros((1,self.eta[vi].shape[1]))),axis=0)
+          #print 'SPB',self.F.shape[1],self.states
           #update eta,theta
-      else:
+          return
+      elif ( len(uniqueL) >0 ) and (vidCount[sq,0]>1):
         #Death
-        feat2kill = random.choice(uniqueL)
+        feat2kill = np.random.choice(uniqueL)
         EtaOld  = self.mlEta(sq,self.F)
         ThetaOld = self.mlTheta(sq,0,0,self.F,-1)
-        oldProb = self.getHMMObsLogProb(sq,EtaOld,ThetaOld)+self.calcLogProbF()
+        oldProb = self.getHMMObsLogProb(sq,EtaOld,ThetaOld)
 
         F = self.F[:,range(0,feat2kill)+range(feat2kill+1,self.F.shape[1])]
         #ThetaNew =
         EtaNew  = self.mlEta(sq,F)
         ThetaNew = self.mlTheta(sq,0,0,F,-1)
-        newProb  = self.getHMMObsLogProb(sq,EtaNew,ThetaNew)+self.calcLogProbF(F,1)
-        if newProb - oldProb > np.log(np.random.rand()):
+        newProb  = self.getHMMObsLogProb(sq,EtaNew,ThetaNew)
+
+        etaa = self.gamma *1.0/(1.0 + 5.0 -1.0 );
+        logPrNumFeat_Diff = ( -1.0 )*np.log( etaa ) +  sp.special.gammaln( F.shape[1]+2 ) - sp.special.gammaln( F.shape[1] + 1 );
+
+        if newProb - oldProb + logPrNumFeat_Diff> np.log(np.random.rand()):
           #accept
           self.F = F
-          self.eta[sq]=EtaNew
-          self.states = ThetaNew
+          #self.eta[sq]=EtaNew
+
+          self.states['v'][0]=np.delete(self.states['v'][0],feat2kill,0)
+          self.states['l'][0]=np.delete(self.states['l'][0],feat2kill,0)
+
+          #Update the next ones
+          L1 =range(len(self.videos))
+          #L1.remove(sq)
+          for vi in L1:
+            for xx in range(feat2kill+1,self.eta[vi].shape[1]):
+              for yy in range(feat2kill+1,self.eta[vi].shape[1]):
+                self.eta[vi][xx-1,yy-1]=self.eta[vi][xx,yy]
+
+            dim2kill = self.eta[vi].shape[1]-1
+            self.eta[vi]=np.delete(self.eta[vi],dim2kill,1)
+            self.eta[vi]=np.delete(self.eta[vi],dim2kill,0)
+          #print 'SPD',self.F.shape[1],self.states
           #update eta,theta
+          return
+    #print 'Final',self.F.shape[1]
     return 0
   def sampleSharedFeats(self):
     #We only sample the columns who has more than one video to support it. In other words, we do not sample features unqiue to a specific video.
@@ -258,7 +319,7 @@ class NPBPSampler:
       for st in range(K):
         pr = np.ones(K)*self.lamb
         pr[st] = self.lamb+ self.kappa
-        priorEt[st,:] = np.random.dirichlet(pr,1)*np.random.gamma(self.lamb*len(vidCount[sq])+self.kappa)#self.eta[sq][st,:]#2 #
+        priorEt[st,:] = np.random.dirichlet(pr,1)*np.random.gamma(self.lamb+self.kappa)#self.eta[sq][st,:]#2 #
         for stt in range(K):
           if (self.F[sq,st]==1) and (self.F[sq,stt]==1):
             priorEt[st,stt]=self.eta[sq][st,stt]
@@ -274,12 +335,12 @@ class NPBPSampler:
           #First decrement the feat count
           featCount[0,ft]=featCount[0,ft]-self.F[sq,ft]
           vidCount[sq,0] = vidCount[sq,0] -  self.F[sq,ft]
-          #Here we sample the F_ik  by using the Eq.15 from Emily Fox et.al., JOINT MODELING OF MULTIPLE TIME SERIES VIA THE BETA PROCESS WITH APPLICATION TO MOTION CAPTURE SEGMENTATION
+          #Here we sample the F_ik  by using the Eq.15 from Emily nFox et.al., JOINT MODELING OF MULTIPLE TIME SERIES VIA THE BETA PROCESS WITH APPLICATION TO MOTION CAPTURE SEGMENTATION
           #First P(f_ik|F):
           if self.F[sq,ft]==1:
-            PrPRatio = (N-featCount[0,ft])/float(featCount[0,ft]+1)
+            PrPRatio = (N-featCount[0,ft]+1)/float(featCount[0,ft]+1)
           else:
-            PrPRatio = (featCount[0,ft]+1)/float(N-featCount[0,ft])
+            PrPRatio = (featCount[0,ft]+1)/float(N-featCount[0,ft]+1)
           #Now get the p(y|...)
           ppE = np.mat(np.copy(ppPI))
           if self.F[sq,ft]==1:
@@ -298,7 +359,7 @@ class NPBPSampler:
             #print 'A',ppE,ft
             PrObsNew = self.getHMMObsLogProb(sq,ppE,self.states)
             #print np.log(np.random.rand()), PrObsNew , PrObsCur,np.log(PrPRatio)
-          if np.log(min(np.random.rand()+0.1,1)) < PrObsNew - PrObsCur + np.log(PrPRatio):
+          if np.log(np.random.rand()) < PrObsNew - PrObsCur + np.log(PrPRatio):
             #print 'Accept'
             PrObsCur=PrObsNew
             self.F[sq,ft] = 1 - self.F[sq,ft]
@@ -380,8 +441,8 @@ class NPBPSampler:
     ts = time.time()
     print 'Time %2.2f sec' % (ts-te)
     self.sampleStateSeq( )
-    #self.sampleEta()
-    #self.sampleTheta()
+    self.sampleEta()
+    self.sampleTheta()
     te = time.time()
     print 'Time %2.2f sec' % (te-ts)
 
@@ -389,32 +450,32 @@ class NPBPSampler:
 
   def runBPRecipe(self,problemInstance,videos,F,Theta,TrP):
     self.videos = videos #[[{'state':0,'obsV':V[0][i,:],'obsL':V[1][i,:]} for i in range(V[0].shape[0])] for V in problemInstance['Videos']]
-    self.F = F
+    self.F = np.mat(np.ones((len(videos),1)))
 
     self.c0 = 1.0
     self.gamma = 2.0
     self.alpha0 = 0.7
     self.beta0 = 0.7
     self.lamb = 1.0
-    self.kappa = 25.0
+    self.kappa = 5.0
 
     self.numVidObjs = 2
     self.numLangObjs = 2
 
     #self.F = np.mat(np.ones((len(problemInstance['Videos']),1))) # All videos are from a single mean
     #self.F = np.mat(np.ones((5,1))) # All videos are from a single mean
-    self.nIter = 100
-    self.states = Theta
+    self.nIter = 1000
+    self.states = {}
+    self.states['v']=[np.ones((1,2))*0.5]
+    self.states['l']=[np.ones((1,2))*0.5]
+    #Theta
     self.minW = 15
     self.maxW = 45
 
     print 'GT:',self.F
-    #self.F[1,2]=1-self.F[1,2]
-    #self.F[2,2]=1-self.F[2,2]
-    #self.F[3,3]=1-self.F[3,3]
 
 
-    self.eta = [np.mat(np.copy(TrP)) for i in range(5)]
+    self.eta = [np.mat([1]) for i in range(5)]
     #for k in range(5):
     #  (i,j)=(1-F[k,:]).nonzero()
     #  self.eta[k][:,np.asarray(j)[0]]=0
@@ -427,5 +488,6 @@ class NPBPSampler:
       print 'Iteration #%d Log-ProbabilityF,Z: %f Log-Probability Total:%f Number of States:%d' %(n,exceptProb,currentProb,self.F.shape[1])
       print self.F
       self.sampleNextState()
+      print self.states
       #print self.F
     return 0

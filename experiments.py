@@ -29,16 +29,27 @@ for i in xrange(1,len(Problem['Videos'])):
 
 F = np.mat([[1,1,1,0],[0,0,1,1],[0,1,1,1],[0,1,1,0],[1,0,1,1]])
 
+
+
 Theta = np.mat([[0.9,0.9],[0.9,0.2],[0.2,0.9],[0.2,0.2]])
-TrP = np.mat([[1+25.0,2.0,3.0,4.0],[3.0,1+25.0,2.0,1.0],[1.0,1.0,2+25.0,3.0],[1.0,1.0,3.0,1.0+25.0]])
+TrP = np.mat([[1+5.0,2.0,3.0,4.0],[3.0,1+5.0,2.0,1.0],[1.0,1.0,2+5.0,3.0],[1.0,1.0,3.0,1.0+5.0]])
 #Proposed Method
 NumVisObjs = 2
 NumLangObjs = 2
 
 NumVIDS = 5
-VidLeng = 100
+VidLeng = 10
 
-ThetaT = np.mat([[1,1],[1,0],[0,1],[0,0]])
+states = {}
+states['v']=[np.zeros((4,2))]
+states['l']=[np.zeros((4,2))]
+for k in range(4):
+  for j in  range(2):
+    states['v'][0][k,j]=np.random.beta(0.7,0.7,1)[0]
+    states['l'][0][k,j]=np.random.beta(0.7,0.7,1)[0]
+
+
+#ThetaT = np.mat([[1,1],[1,0],[0,1],[0,0]])
 
 prevst = 0
 st=2
@@ -46,29 +57,23 @@ videos=[]
 for k in range(5):
   st = k%4
   vidi = []
-  for t in range(100):
+  for t in range(10):
     stP = TrP[st,:]
     newP=np.multiply(F[k,:],stP)
     stP = newP/float(np.sum(newP,axis=1))
     #print st,stP
     st=np.random.choice(range(4),p=np.array(stP)[0])
     fr = {}
-    fr['state']=st
-    fr['obsV']=[ ThetaT[st,0],ThetaT[st,1]]
-    fr['obsL']=[ ThetaT[st,0],ThetaT[st,1]]
+    fr['state']=0
+    #fr['gt']=st
+    fr['obsV']=[ np.random.binomial(1,states['v'][0][st,0]) ,np.random.binomial(1,states['v'][0][st,0])]
+    fr['obsL']=[ np.random.binomial(1,states['v'][0][st,0]) ,np.random.binomial(1,states['v'][0][st,0])]
     vidi.append(fr)
   videos.append(vidi)
 
-states = {}
-states['v']=[np.zeros((4,2))]
-states['l']=[np.zeros((4,2))]
-for k in range(4):
-  states['v'][0][k,0] =Theta[k,0]
-  states['v'][0][k,1] =Theta[k,1]
-  states['l'][0][k,0] =Theta[k,0]
-  states['l'][0][k,1] =Theta[k,1]
 
-print 'A'
+print 'GT:',F
+print 'GT:',states
 
 F = np.mat([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1],[1,0,0,0]])
 
