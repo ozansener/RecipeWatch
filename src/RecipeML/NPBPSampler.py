@@ -199,7 +199,7 @@ class NPBPSampler:
           uniqueL.append(kk)
       #print 'A',self.F,sq,uniqueL
       #return
-      if len(uniqueL)==0 or np.random.rand()>0.5:
+      if (len(uniqueL)==0 or np.random.rand()>0.5) and (K<8):
         #Birth
         #First choose data driven window length
         vid = self.videos[sq]
