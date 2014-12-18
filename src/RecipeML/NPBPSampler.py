@@ -120,11 +120,8 @@ class NPBPSampler:
         self.states['l'][0][k,j]=np.random.beta(self.alpha0+countLStatistics[k,j],self.beta0+(countStates[0,k]-countLStatistics[k,j]),1)[0]
 
   def sampleStateSeq(self):
-    threads = []
     for vi in range(len(self.videos)):
-      threads.append(thread.start_new_thread( self.sampleHMMStates, (self,vi) ))
-    for t in threads:
-      t.join()
+      self.sampleHMMStates(vi)
     return 0
 
   def sampleHMMStates(self,sq):
