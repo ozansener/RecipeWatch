@@ -498,7 +498,7 @@ class NPBPSampler:
 
     #self.F = np.mat(np.ones((len(problemInstance['Videos']),1))) # All videos are from a single mean
     #self.F = np.mat(np.ones((5,1))) # All videos are from a single mean
-    self.nIter = 300
+    self.nIter = 100
     self.states = {}
     self.states['v']=[np.ones((1,2))*0.5]
     self.states['l']=[np.ones((1,2))*0.5]
