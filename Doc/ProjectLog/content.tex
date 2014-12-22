@@ -2,9 +2,9 @@
 % This is included by the the driver file (FlipBeamerTemplate.tex).
 \iffalse
 {
-\setbeamertemplate{footline}{} 
+\setbeamertemplate{footline}{}
 \setbeamertemplate{sidebar right}{\llap{\includegraphics[width=\paperwidth,height=\paperheight]{BG_upper}}}
-\begin{frame}[c]%{\phantom{title page}} 
+\begin{frame}[c]%{\phantom{title page}}
 \phantom{title page}
  \titlepage
 \end{frame}
@@ -26,13 +26,13 @@
 \item Watch people performing these tasks (youtube.com, etc.) \quad \emph{activity recognition [Koppula et.al.,  Schiele et.al.]}
 \end{itemize}
 \end{itemize}
-\bf{Large scale, multi-modal, extensive information is available; however, we do not know how to represent/understand them.}	
+\bf{Large scale, multi-modal, extensive information is available; however, we do not know how to represent/understand them.}
 \end{frame}
 
 \defbeamertemplate{itemize item}{good}{\small\includegraphics[width=3mm]{good23}}
 \defbeamertemplate{itemize item}{bad}{\small\includegraphics[width=3mm]{error}}
 
-\begin{frame}{Large-Scale Recipes for Daily Activities}{Cooking Recipes, Recipes to fix house hold items/cars}	
+\begin{frame}{Large-Scale Recipes for Daily Activities}{Cooking Recipes, Recipes to fix house hold items/cars}
 \begin{columns}
 		\begin{column}[T]{5.5cm}
 		{\bf Text Based Resources}\\
@@ -129,15 +129,15 @@ Any recipe can be represented as admissible set of sub-tasks, their ordering req
 \item We define Co-Not-Occurrence requirements over a matrices $C^{NO,v}$ and $C^{NO,l}$ as $C^{NO,v}_{i,j} =1$ if $v_i$ and $v_j$ do not occur together. For example, the partial matrix for poaching egg case:
 \end{itemize}
 \[
- \begin{array}{ccccccc} 
-&\rotatebox{90}{Water} & \rotatebox{90}{Pan} & \rotatebox{90}{Tap} & \rotatebox{90}{Gelatin} & \rotatebox{90}{Poacher} & \rotatebox{90}{Cup} \\ 
+ \begin{array}{ccccccc}
+&\rotatebox{90}{Water} & \rotatebox{90}{Pan} & \rotatebox{90}{Tap} & \rotatebox{90}{Gelatin} & \rotatebox{90}{Poacher} & \rotatebox{90}{Cup} \\
 \text{Water} &  & 0 & 0 & 0 & 0 & 0 \\
 \text{Pan} & 0 &  & 0 & 0 & 0 & 0 \\
 \text{Tap} & 0 & 0 &  & 0 & 0 & 0 \\
 \text{Gelatin} & 0 & 0 & 0 &  & 1 & 1 \\
 \text{Poacher} & 0 & 0 & 0 & 1 &  & 1 \\
-\text{Cup} & 0 & 0 & 0 & 1 & 1 & 
-\end{array} 
+\text{Cup} & 0 & 0 & 0 & 1 & 1 &
+\end{array}
 \]
 \end{frame}
 
@@ -154,7 +154,7 @@ In order to obtain the sub-task co-not-occurrence,
  \times [0 \ldots K]$ as;
 \begin{itemize}
 \item $P((i,j) \in \mathcal{C}) \sim {x^v_i}^T C^{NO,v} x^v_j + {x^l_i}^T C^{NO,l} x^l_j$
-\end{itemize} 
+\end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -165,15 +165,15 @@ Similarly for ordering, we also model it over the extracted visual and language 
 \item We define ordering requirements over a matrices $C^{OR,v}$ and $C^{OR,l}$ as $C^{OR,v}_{i,j} =1$ if $v_i$ has to occur after $v_j$. For example, the partial matrix for poaching egg case:
 \end{itemize}
 \[
- \begin{array}{ccccccc} 
-&\rotatebox{90}{Water} & \rotatebox{90}{Pan} & \rotatebox{90}{Tap} & \rotatebox{90}{Gelatin} & \rotatebox{90}{Poacher} & \rotatebox{90}{Cup} \\ 
+ \begin{array}{ccccccc}
+&\rotatebox{90}{Water} & \rotatebox{90}{Pan} & \rotatebox{90}{Tap} & \rotatebox{90}{Gelatin} & \rotatebox{90}{Poacher} & \rotatebox{90}{Cup} \\
 \text{Water} &  & 1 & 1 & 0 & 0 & 0 \\
 \text{Pan} & 0 &  & 0 & 0 & 0 & 0 \\
 \text{Tap} & 0 & 0 &  & 0 & 0 & 0 \\
 \text{Gelatin} & 1 & 1 & 1 &  & 0 & 0 \\
 \text{Poacher} & 1 & 1 & 1 & 0 &  & 0 \\
-\text{Cup} & 0 & 0 & 0 & 0 & 0 & 
-\end{array} 
+\text{Cup} & 0 & 0 & 0 & 0 & 0 &
+\end{array}
 \]
 \end{frame}
 
@@ -190,12 +190,93 @@ In order to obtain the sub-task ordering,
  \times [0 \ldots K]$ as;
 \begin{itemize}
 \item $P((i,j) \in \mathcal{C}) \sim {x^v_i}^T C^{OR,v} x^v_j + {x^l_i}^T C^{OR,l} x^l_j$
-\end{itemize} 
+\end{itemize}
 \end{itemize}
 \end{frame}
 
 
-\iffalse 
+\begin{frame}{Experiments - Artificial Data}
+\begin{itemize}
+\item It looks like algorithm is converging to the correct number of features (4 in this experiment)
+\end{itemize}
+\begin{centering}
+\includegraphics[width=0.5\textwidth,height=0.25\textheight]{recoveringNumber.png}
+\end{centering}
+\begin{itemize}
+\item Log Likelihood seems like converging as well (starting one is -140)
+\end{itemize}
+\includegraphics[width=0.7\textwidth]{logLikelihood.png}
+
+\end{frame}
+
+
+\begin{frame}{Experiments - Artificial Data}
+\begin{itemize}
+\item It looks like algorithm is recovering ordering etc.
+\end{itemize}
+\begin{columns}[c]
+\column{.5\textwidth}
+Real:
+\begin{table}
+  \begin{center}
+    \begin{tabular}{ccccc}
+0.     &    0.   &       1.      &    0.      &    0. \\
+0.     &     0.     &     0.     &     0.       &   1.   \\
+1.     &     0.     &     0.      &    0.	  &  0. \\
+ 0.    &      0.     &     0.	    &   0.    &      0.	 \\
+ 0.    &      1.     &     0.  	  &     0.	&   0.
+    \end{tabular}
+  \end{center}
+\end{table}
+\column{.5\textwidth}
+Estimated:
+\hspace{-15mm}
+\begin{table}
+  \begin{center}
+    \begin{tabular}{ccccc}
+0.     &    0.   &      0.98  & 0.07      &    0. \\
+0.     &     0.     &     0.     &     0.       &   0.60  \\
+0.98     &     0.     &     0.      &    0.	  &  0. \\
+ 0.07     &      0.     &     0.	    &   0.    &      0.	 \\
+ 0.    &      0.60    &     0.  	  &     0.	&   0.
+    \end{tabular}
+  \end{center}
+\end{table}
+
+\end{columns}
+\end{frame}
+
+
+\begin{frame}{Experiments - Artificial Data}
+\begin{itemize}
+\item NPBayes is clearly outperforming original HMM even with correct number of clusters.
+\item Intersection over union scores are:
+\end{itemize}
+
+\begin{table}
+  \begin{tabular}{cc}
+HBPRecipes: & 0.5339 \\ EM-HMM w/GT: & 0.4576 \\ EM-HMM w/o GT: & 0.3391
+\end{tabular}
+\end{table}
+\end{frame}
+
+
+\begin{frame}{Problems \& Questions}
+\begin{itemize}
+\item Computational complexity: Current system is running in couple hours for 100 videos 20 activities recipe
+\item Results: We expect results to be better at least on artificial data, but I suspect there might be problems in implementaiton and HMMs are behaving weird when we feed 100 frames.
+\item Evaluation: We need better evaluation metric
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Plans}
+\begin{itemize}
+\item Continue to play with the implementation until we reach confident numbers.
+\item Starting to run and experiment the vision pipeline.
+\end{itemize}
+\end{frame}
+
+\iffalse
 
 \begin{frame}{How to Understand Large-Scale Recipes}
 
@@ -208,7 +289,7 @@ In order to obtain the sub-task ordering,
 
 {\bf Challenges}
 \begin{itemize}
-\item (Weakly/Un)Supervised learning using large-scale unlabelled/weakly labelled data 
+\item (Weakly/Un)Supervised learning using large-scale unlabelled/weakly labelled data
 \item Noisy data (unrelated search results etc.)
 \item Incomplete data (some recipes will miss some of the steps)
 \item Ambiguity of the language
@@ -267,18 +348,18 @@ In order to obtain the sub-task ordering,
 \begin{itemize}
 \item {\bf Text from image [Yang et.al.]:} Text description via object descriptors and a language model.
 \item {\bf Grounding action descriptors [Regneri et.al.]} Given videos and text description, find similar action verbs. Later used for paraphrase detection
-\item {\bf Domain adaptation [Elhoseiny et.al.]} Given complete text descriptions and incomplete visual information (missing classes), how to train visual classifier. 
+\item {\bf Domain adaptation [Elhoseiny et.al.]} Given complete text descriptions and incomplete visual information (missing classes), how to train visual classifier.
 \item {\bf Learning visual meanings of text [Zitnick et.al.]:} Given clip-art images and texts, find visual meanings of words like near, run-to, etc.
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Incomplete Review of the Literature}{Machine learning for graph completion/representation}
 \begin{itemize}
-\item {\bf Plot Graph [Li et.al.]:} Generate story-graph from crowd source stories. Output is graph represented 
+\item {\bf Plot Graph [Li et.al.]:} Generate story-graph from crowd source stories. Output is graph represented
 since input is set of nodes.
 \item {\bf Network Inference [Nowak et.al., Kubica et.al.]:} An EM algorithm to recover the network topology from the onordered paths. There is no uncertainty about the nodes, only the ordering.
 \item {\bf Learning Bayes Networks [Teysier et.al.]:}
-\item {\bf StoryLine from Videos and Texts [Gupta et.al.]:} Fully supervised, only and/or graph structure. 
+\item {\bf StoryLine from Videos and Texts [Gupta et.al.]:} Fully supervised, only and/or graph structure.
 \end{itemize}
 \end{frame}
 %\item {\bf }\item {\bf }\end{itemize}
@@ -302,7 +383,7 @@ since input is set of nodes.
 {\bf Text+Visual data:}
 \begin{itemize}
 \item (Small) Cooking dataset of videos and text descriptions
-\item (Small) MSR data of clip-arts representing some daily activities with text descriptions  
+\item (Small) MSR data of clip-arts representing some daily activities with text descriptions
 \end{itemize}
 
 \end{frame}
@@ -470,7 +551,7 @@ August 26
 \begin{frame}{Representation of the Frame}
 \begin{itemize}
 \item To represent object proposals, we can use either GMM or mean of the extracted histograms/sifts. In other words, given cluster $i$, we represent it as $\bar{x_i}$.
-\item From wikiHow entry, find all salient action verbs, salient object names and their synonyms. 
+\item From wikiHow entry, find all salient action verbs, salient object names and their synonyms.
 \item In order to represent each frame, I propose;
 \begin{itemize}
 \item Propose $M$ object segments from the frame.
@@ -531,7 +612,7 @@ We need to evaluate;
 Metric;
 \begin{itemize}
 \item $\Delta_T=$ IOU metric for temporal segments after labelling.
-\item $\Delta_S=$ Smallest string matching distance between ground truth and resulting sequence. 
+\item $\Delta_S=$ Smallest string matching distance between ground truth and resulting sequence.
 \item $\Delta_L=$ F-measure between extracted action/object names vs ground truth action object names.
 \end{itemize}
 \end{frame}
@@ -540,9 +621,9 @@ Metric;
 \begin{itemize}
 \item Running baseline s on 3 Recipes (10 Videos each).
 \item Fixing bugs/optimizing parameters and finalizing the baseline.
-\item Language Only, Vision Only Tests.		
+\item Language Only, Vision Only Tests.
 \item Measuring performance.
-\item Labelling videos. 
+\item Labelling videos.
 \end{itemize}
 \end{frame}
 
@@ -565,7 +646,7 @@ Some sub-tasks have ordering requirements like pan need to be filled with water 
 
 \begin{frame}{Model}
 \begin{itemize}
-\item Since sub-tasks are latent within the application, we can not model co-not-occurrence and ordering over sub-tasks. 
+\item Since sub-tasks are latent within the application, we can not model co-not-occurrence and ordering over sub-tasks.
 \item We can model these relations over the atomic concepts which sub-tasks are using. Hence, We model them over extracted visual objects and extracted words.
 \end{itemize}
 \end{frame}
@@ -577,15 +658,15 @@ Some sub-tasks have ordering requirements like pan need to be filled with water 
 \item We define Co-Not-Occurrence requirements over a matrices $C^{NO,v}$ and $C^{NO,l}$ as $C^{NO,v}_{i,j} =1$ if $v_i$ and $v_j$ can not occur together. For example, the partial matrix for poaching egg case:
 \end{itemize}
 \[
- \begin{array}{ccccccc} 
-&\rotatebox{90}{Water} & \rotatebox{90}{Pan} & \rotatebox{90}{Tap} & \rotatebox{90}{Gelatin} & \rotatebox{90}{Poacher} & \rotatebox{90}{Cup} \\ 
+ \begin{array}{ccccccc}
+&\rotatebox{90}{Water} & \rotatebox{90}{Pan} & \rotatebox{90}{Tap} & \rotatebox{90}{Gelatin} & \rotatebox{90}{Poacher} & \rotatebox{90}{Cup} \\
 \text{Water} &  & 0 & 0 & 0 & 0 & 0 \\
 \text{Pan} & 0 &  & 0 & 0 & 0 & 0 \\
 \text{Tap} & 0 & 0 &  & 0 & 0 & 0 \\
 \text{Gelatin} & 0 & 0 & 0 &  & 1 & 1 \\
 \text{Poacher} & 0 & 0 & 0 & 1 &  & 1 \\
-\text{Cup} & 0 & 0 & 0 & 1 & 1 & 
-\end{array} 
+\text{Cup} & 0 & 0 & 0 & 1 & 1 &
+\end{array}
 \]
 \end{frame}
 
@@ -602,7 +683,7 @@ In order to obtain the sub-task co-not-occurrence,
  \times [0 \ldots K]$ as;
 \begin{itemize}
 \item $P((i,j) \in \mathcal{C}) \sim {x^v_i}^T C^{NO,v} x^v_j + {x^l_i}^T C^{NO,l} x^l_j$
-\end{itemize} 
+\end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -613,15 +694,15 @@ Similarly for ordering, we also model it over the extracted visual and language 
 \item We define ordering requirements over a matrices $C^{OR,v}$ and $C^{OR,l}$ as $C^{OR,v}_{i,j} =1$ if $v_i$ has to occur after $v_j$. For example, the partial matrix for poaching egg case:
 \end{itemize}
 \[
- \begin{array}{ccccccc} 
-&\rotatebox{90}{Water} & \rotatebox{90}{Pan} & \rotatebox{90}{Tap} & \rotatebox{90}{Gelatin} & \rotatebox{90}{Poacher} & \rotatebox{90}{Cup} \\ 
+ \begin{array}{ccccccc}
+&\rotatebox{90}{Water} & \rotatebox{90}{Pan} & \rotatebox{90}{Tap} & \rotatebox{90}{Gelatin} & \rotatebox{90}{Poacher} & \rotatebox{90}{Cup} \\
 \text{Water} &  & 1 & 1 & 0 & 0 & 0 \\
 \text{Pan} & 0 &  & 0 & 0 & 0 & 0 \\
 \text{Tap} & 0 & 0 &  & 0 & 0 & 0 \\
 \text{Gelatin} & 1 & 1 & 1 &  & 0 & 0 \\
 \text{Poacher} & 1 & 1 & 1 & 0 &  & 0 \\
-\text{Cup} & 0 & 0 & 0 & 0 & 0 & 
-\end{array} 
+\text{Cup} & 0 & 0 & 0 & 0 & 0 &
+\end{array}
 \]
 \end{frame}
 
@@ -638,7 +719,7 @@ In order to obtain the sub-task ordering,
  \times [0 \ldots K]$ as;
 \begin{itemize}
 \item $P((i,j) \in \mathcal{C}) \sim {x^v_i}^T C^{OR,v} x^v_j + {x^l_i}^T C^{OR,l} x^l_j$
-\end{itemize} 
+\end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -650,13 +731,13 @@ In order to obtain the sub-task ordering,
 \item By using co-not occurrence and co-order matrices, sample a graph.
 \item From a graph, sample a path for the video and sample a sub-graph for WikiHow entry.
 \end{itemize}
-\end{frame}	
+\end{frame}
 
 \begin{frame}{Questions to Answer}
 \begin{itemize}
 \item Optimization functions to find the matrices.
 \item Details of the generative model.
 \end{itemize}
-\end{frame}	
+\end{frame}
 
 \fi

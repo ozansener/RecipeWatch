@@ -39,6 +39,81 @@ class HMMFast:
 
   def getPosterior(self):
     return self.Post
+  def sampleFast(self,unNormalizedTranP,ObsLikelihoods):
+    #pdb.set_trace()
+    self.len = ObsLikelihoods.shape[1]
+    for k in range(unNormalizedTranP.shape[0]):
+      unNormalizedTranP[k,:]=unNormalizedTranP[k,:]/(np.sum(unNormalizedTranP[k,:],axis=1)[0,0])
+
+    self.beta = np.zeros((self.len,self.dim))
+    for i in range(self.len):
+      # backward part of the algorithm
+      for i in range(self.len-1,-1,-1):
+          for st in range(self.dim):
+              if i == (self.len-1):
+                  # base case for backward part
+                  self.beta[i,st] = 1
+              else:
+                  self.beta[i,st] = sum(unNormalizedTranP[st,l]* np.exp(ObsLikelihoods[l,i+1]) *self.beta[i+1,l] for l in range(self.dim))
+          self.beta[i,:]=self.beta[i,:]/np.sum(self.beta[i,:])
+    samp = []
+    PR = np.zeros(self.dim)
+    for j in range(self.dim):
+      PR[j]= np.exp(ObsLikelihoods[j,0])
+
+    PR = np.multiply(PR,self.beta[0,:])
+    PR = PR/np.sum(PR)
+    samp.append(np.random.choice(range(self.dim),p=PR))
+    for t in range(1,self.len):
+      PR = self.beta[t,:]
+      PR = np.multiply(PR, np.asarray(unNormalizedTranP[samp[t-1],:])[0])
+      #print PR,self.dim
+      for j in range(self.dim):
+        PR[j]=PR[j]* np.exp(ObsLikelihoods[j,t])
+
+      PR = PR/np.sum(PR)
+      samp.append(np.random.choice(range(self.dim),p=PR))
+    return samp
+
+
+  def runCachedSmoothing(self,unNormalizedTranP,ObsLikelihoods):
+    for k in range(unNormalizedTranP.shape[0]):
+      unNormalizedTranP[k,:]=unNormalizedTranP[k,:]/(np.sum(unNormalizedTranP[k,:],axis=1)[0,0])
+
+    L = ObsLikelihoods.shape[1]
+    self.len = L
+    self.alpha = np.zeros((self.len,self.dim))
+    # forward part of the algorithm
+    for i in range(self.len):
+        f_curr = {}
+        for st in range(self.dim):
+            if i == 0:
+                # base case for the forward part
+                prev_f_sum = 1
+            else:
+                prev_f_sum = sum(self.alpha[i-1,k]*unNormalizedTranP[k,st] for k in range(self.dim))
+
+            self.alpha[i,st]=prev_f_sum*np.exp(ObsLikelihoods[st,i])
+        self.alpha[i,:]=self.alpha[i,:]/np.sum(self.alpha[i,:])
+
+    self.beta = np.zeros((self.len,self.dim))
+    for i in range(self.len):
+      # backward part of the algorithm
+      for i in range(self.len-1,-1,-1):
+          for st in range(self.dim):
+              if i == (self.len-1):
+                  # base case for backward part
+                  self.beta[i,st] = 1
+              else:
+                  self.beta[i,st] = sum(unNormalizedTranP[st,l]* np.exp(ObsLikelihoods[l,i+1]) *self.beta[i+1,l] for l in range(self.dim))
+          self.beta[i,:]=self.beta[i,:]/np.sum(self.beta[i,:])
+
+    logLik =0
+    for i in range(self.len):
+      logLik = logLik + np.log(np.sum([self.alpha[i,g]*self.beta[i,g]*np.exp(ObsLikelihoods[g,i]) for g in range(self.dim)])) - np.log(np.sum([self.alpha[i,g]*self.beta[i,g] for g in range(self.dim)]))
+    return logLik
+
+
   def setProblem(self,RepMat,OrdMat,TranProb,InitProb,Len,Obs,obsFunc):
     self.R = RepMat
     self.O = OrdMat
