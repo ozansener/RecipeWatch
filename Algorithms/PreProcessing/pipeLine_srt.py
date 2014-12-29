@@ -13,4 +13,4 @@ for fol in Folds:
 		try:
 			os.system('java -cp Subtitle.jar:commons-io-2.4.jar:jdom.jar Ozan https://www.youtube.com/watch?v='+f+' '+'./'+fol+'SRT/'+f+'_srt.txt')
 		except:
-			print '\t \t SRT Download Failed'	
+			print '\t \t SRT Download Failed'

@@ -12,4 +12,3 @@ for fol in Folds:
 	os.system( 'cp -rf '+defd+'/CPMC/cpmc_base/ '+defd+'/CPMC/cpmc_'+abc+'/')
 	print 'cp '+defd+'/Frames_CPMC_Scaled/'+abc+'/* '+defd+'/CPMC/cpmc_'+abc+'/data/JPEGImages/'
 	os.system( 'cp '+defd+'/Frames_CPMC_Scaled/'+abc+'/*.jpg '+defd+'/CPMC/cpmc_'+abc+'/data/JPEGImages/')
-

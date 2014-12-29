@@ -21,6 +21,29 @@ my_schema = ModalSchema({
                           'load_func':lambda p: imread(p), # how to load from disk. (p = path to file)
                           'save_func':lambda x, p: imsave(p, x) # how to save to disk, when set. (optional)
                       },
+
+          		'masks':	{
+          						'mode':'disk',
+          						'filename':'masks_and_scores.mat',
+          						'load_func':lambda p: loadmat(p, variable_names=['masks'])['masks'],
+          						'save_func':None
+          					},
+
+          		'scores':	{
+          						'mode':'disk',
+          						'filename':'masks_and_scores.mat',
+          						'load_func':lambda p: loadmat(p, variable_names=['scores'])['scores'],
+          						'save_func':None
+          					},
+
+          		'cnn_features':	{
+          						'mode':'disk',
+          						'filename':'features.npy',
+          						'load_func':lambda p: cPickle.load(p),
+          						'save_func':lambda x, p: cPickle.dump(x, open(p, 'w'))
+          					}
+
+
                 'subtitles':{
                             'mode':'memory'
                             }
