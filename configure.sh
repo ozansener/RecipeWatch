@@ -10,4 +10,5 @@ export MONGODB_DBPATH=`pwd`/data/db
 
 #===[ Add Caffe to Path ]===
 export CAFFE_ROOT_PATH=/home/ozan/caffe
-export PYTHONPATH=$PYTHONPATH:$CAFFE_ROOT_DIR/python
+#export PYTHONPATH=$PYTHONPATH:$CAFFE_ROOT_DIR/python
+export PYTHONPATH=${HOME}/python:$PYTHONPATH

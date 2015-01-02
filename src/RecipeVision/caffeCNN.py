@@ -43,7 +43,7 @@ class CaffeCNN:
 			activations of this network
 		"""
 		self.cnn.predict([image])
-		return self.cnn.blobs['fc7'].data[4].flatten()
+		return self.cnn.blobs['pool5'].data[4].flatten()
 
 
 	def featurize_frame(self, frame, n=50, black=False):
@@ -53,3 +53,10 @@ class CaffeCNN:
 		"""
 		proposals = frame.top_n_cropped_object_proposals(n=25, black=False)
 		return {ix:self.featurize(obj) for ix, obj in proposals}
+
+	def featurize_proposals(self, proposals,ids):
+		"""
+			given a frame, returns a mapping:
+				features: mask_ix -> feature_array
+		"""
+		return {ids[ix]:self.featurize(obj) for ix, obj in enumerate(proposals)}

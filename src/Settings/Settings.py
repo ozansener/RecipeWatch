@@ -4,7 +4,7 @@ from scipy.misc import imread, imsave
 import pysrt
 import cPickle
 
-data_dir =  '/home/ozan/ModalData/'
+data_dir =  '/media/modalDB/dat/'
 #Push them to the ModalDB
 my_schema = ModalSchema({
     # Frames consist of an image (stored on disk) and accompanying subtitles (stored in memory)
@@ -41,9 +41,7 @@ my_schema = ModalSchema({
           						'filename':'features.npy',
           						'load_func':lambda p: cPickle.load(p),
           						'save_func':lambda x, p: cPickle.dump(x, open(p, 'w'))
-          					}
-
-
+          					},
                 'subtitles':{
                             'mode':'memory'
                             }
