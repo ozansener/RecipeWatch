@@ -12,7 +12,9 @@
 
 import numpy as Math
 import pylab as Plot
-	
+import glob
+import pickle
+
 def Hbeta(D = Math.array([]), beta = 1.0):
 	"""Compute the perplexity and the P-row for a specific value of the precision of a Gaussian distribution."""
 	
@@ -168,5 +170,28 @@ if __name__ == "__main__":
 	print "Running example on 2,500 MNIST digits..."
 	X = Math.loadtxt("mnist2500_X.txt");
 	labels = Math.loadtxt("mnist2500_labels.txt");
-	Y = tsne(X, 2, 50, 20.0);
-	Plot.scatter(Y[:,0], Y[:,1], 20, labels);
+	A = glob.glob('*.bn')
+	idxs = []
+	feats = []
+	for fil in A:
+		dat = pickle.load(open(fil,'rb'))
+		for vids in dat:
+			for feat in vids['Features']:
+				idxs.append(vids['name']+'_'+str(feat))
+				feats.append(vids['Features'][feat])
+			#print vids['Features']
+	print X.shape
+	FeatArray = Math.array(feats)
+	print len(idxs)
+	print len(feats)
+	print FeatArray.shape
+	print FeatArray.dtype
+	XX = FeatArray.astype('float64')
+	#XX = FeatArray.view('float32')
+	print XX.shape
+	print XX.dtype
+	ZZ = tsne(XX,2,50,20.0)
+	pickle.dump(ZZ,open('result.bn','wb'))
+        pickle.dump(idxs,open('idxs.bn','wb'))
+	#Y = tsne(X, 2, 50, 20.0);
+	#Plot.scatter(Y[:,0], Y[:,1], 20, labels);
