@@ -9,6 +9,8 @@ from sklearn.cluster import SpectralClustering
 from ModalDB import *
 import numpy as np
 import scipy as sp
+import scipy.sparse
+
 import pickle
 import glob
 
@@ -44,6 +46,27 @@ class CoCluster:
     Create a 100x100 grid of members of each cluster and save it as an image
     """
     return 0
+
+  def getPairwiseDistanceMatrix(self):
+    """
+      It is sloghtly slower but memory efficient, fast implementation is not tractable in terms of memory for such a scale
+    """
+    dataSize = self.data_points.shape
+    self.PDistMat = sp.sparse.csr_matrix((dataSize[0],dataSize[0]))
+    for k in range(dataSize[0]):
+      CurrentPoint = self.data_points[k,:]
+      Dist = sp.spatial.distance.cdist(np.reshape(CurrentPoint,(1,2)),self.data_points,'euclidean')
+      kMins = []
+      kDists = []
+      maxD = np.max(Dist)
+      for len(kMins<5):
+        cMins = np.argmin(Dist)
+        kMins.append(cMins)
+        kDists.append(Dist[cMins])
+        Dist[cMins]=maxD
+      for pt in range(len(kMins)):
+        self.PDistMat[k,kMins[pt]]=kDists[pt]
+        self.PDistMat[kMins[pt],k]=kDists[pt]
 
   def runAffinityPropogation(self):
     """
