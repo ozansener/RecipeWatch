@@ -55,18 +55,20 @@ class CoCluster:
     self.PDistMat = sp.sparse.csr_matrix((dataSize[0],dataSize[0]))
     for k in range(dataSize[0]):
       CurrentPoint = self.data_points[k,:]
-      Dist = sp.spatial.distance.cdist(np.reshape(CurrentPoint,(1,2)),self.data_points,'euclidean')
+      Dist = sp.spatial.distance.cdist(np.reshape(CurrentPoint,(1,dataSize[1])),self.data_points,'euclidean')
       kMins = []
       kDists = []
-      maxD = np.max(Dist)
-      for len(kMins<5):
+      maxD = np.max(Dist)+1
+      while len(kMins)<5:
         cMins = np.argmin(Dist)
         kMins.append(cMins)
-        kDists.append(Dist[cMins])
-        Dist[cMins]=maxD
+        kDists.append(Dist[0,cMins])
+        Dist[0,cMins]=maxD
       for pt in range(len(kMins)):
+        #print kMins[pt],k,self.PDistMat.shape,kDists[pt],pt,kDists
         self.PDistMat[k,kMins[pt]]=kDists[pt]
         self.PDistMat[kMins[pt],k]=kDists[pt]
+    pickle.dump(self.PDistMat,open('pdist.bnbb','wb'))
 
   def runAffinityPropogation(self):
     """
