@@ -3,7 +3,7 @@ from sklearn import metrics
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import NearestNeighbors
-from sklearn.cluster import SpectralClustering
+from sklearn.cluster import SpectralClustering,spectral_clustering
 
 
 from ModalDB import *
@@ -35,7 +35,7 @@ class CoCluster:
     FeatArray = np.array(feats)
     XX = FeatArray.astype('float64')
 
-    pickle.dump(idxs,open('idxs.bn','wb'))
+    pickle.dump(idxs,open('idxs.bnb','wb'))
 
     self.data_points = XX;
     self.labels_gt = np.loadtxt("mnist2500_labels.txt");
@@ -58,13 +58,13 @@ class CoCluster:
       binVals = np.ones(tempVals.shape)
       curCost = 0
       bestCost = 0
-      for i in range(min(1000,sortVals.shape[0]-1),sortVals.shape[0]):
+      for i in range(sortVals.shape[0]):
         curT =sortVals[i,0]
         binVals[tempVals<=curT]=0
         bM = np.mat(binVals).T
         curCost = (bM.T*self.PDistMat*bM)/(bM.T*bM)
-        if curCost>bestCost:
-          bestCost = curCost
+        if curCost[0,0]>bestCost:
+          bestCost = curCost[0,0]
           finVals = binVals.copy()
 
       indices = np.where(finVals)[0]
@@ -77,6 +77,7 @@ class CoCluster:
 
       out1 = self.PDistMat.tocsc()[:,remIndices]
       self.PDistMat = out1.tocsr()[remIndices,:]
+      print self.PDistMat
       idxs = idxs[remIndices]
 
   def getPairwiseDistanceMatrix(self):
@@ -102,11 +103,14 @@ class CoCluster:
         self.PDistMat[k,kMins[pt]]=kDists[pt]
         self.PDistMat[kMins[pt],k]=kDists[pt]
 
+    SM=self.PDistMat.data.mean()
+    self.PDistMat.data[:] = np.exp(((-1)*self.PDistMat.data)/SM)
     #Here we go a bit low-level and apply the e^(-1.x) to the data array
-    self.PDistMat.data = np.exp((-1)*self.PDistMat.data)
+    #self.PDistMat.data = np.exp((-1)*self.PDistMat.data)
 
     pickle.dump(self.PDistMat,open('pdist.bnbb','wb'))
-
+    labs = spectral_clustering(self.PDistMat,n_clusters=20)
+    pickle.dump(labs,open('labs.bnbb','wb'))
   def runAffinityPropogation(self):
     """
     Run the  affinity propogation algorithm. It is used as a baseline in the paper
