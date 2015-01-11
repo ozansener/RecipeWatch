@@ -20,9 +20,6 @@ class CoCluster:
     """
     Iterate over entire ModalDB, gets all the features. The features should be pre-computed
     """
-
-    dcnt = 0
-
     A = glob.glob('=*.bn')
     print A
     idxs = []
@@ -33,9 +30,6 @@ class CoCluster:
         for feat in vids['Features']:
           idxs.append(vids['name']+'_'+str(feat))
           feats.append(vids['Features'][feat])
-        if dcnt>100:
-          break
-        dcnt = dcnt+1
       if not ModalClient == 42:
         break
     FeatArray = np.array(feats)
