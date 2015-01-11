@@ -54,7 +54,7 @@ class CoCluster:
       vals, vecs = sp.sparse.linalg.eigsh(self.PDistMat, k=1,which='LM')
       #Now we will discreteize it to find the best threshold
       sortVals = np.sort(vecs,axis=0)
-      tempVals = np.ones(vecs[:,0].copy()
+      tempVals = vecs[:,0].copy()
       binVals = np.ones(temp.Vals.shape)
       finVals = binVals.copy()
       curCost = 0
@@ -73,7 +73,7 @@ class CoCluster:
 
       if len(remIndices)<2:
         break
-        
+
       out1 = self.PDistMat.tocsc()[:,remIndices]
       self.PDistMat = out1.tocsr()[remIndices,:]
       idxs = idxs[remIndices]
