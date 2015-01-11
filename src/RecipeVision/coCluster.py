@@ -47,10 +47,42 @@ class CoCluster:
     """
     return 0
 
+  def getClusters(self):
+    idxs = np.array(range(0,self.PDistMat.shape[0]))
+    while len(self.clusters<100):
+      #First let's find the eigenvector corresponding to the largest eigen value
+      vals, vecs = sp.sparse.linalg.eigsh(self.PDistMat, k=1,which='LM')
+      #Now we will discreteize it to find the best threshold
+      sortVals = np.sort(vecs,axis=0)
+      tempVals = np.ones(vecs[:,0].copy()
+      binVals = np.ones(temp.Vals.shape)
+      finVals = binVals.copy()
+      curCost = 0
+      for i in range(min(1000,sortVals.shape[0]-1),sortVals.shape[0]):
+        curT =sortVals[i,0]
+        binVals[tempVals<=curT]=0
+        curCost = (binVals.T*self.PDistNat*binVals)/(binVals.T*binVals)
+        if curCost>bestCost:
+          bestCost = curCost
+          finVals = binVals.copy()
+
+      indices = np.where(finVals)[0]
+      remIndices = np.where(1-finVals)[0]
+      self.clusters.append(idxs[indices])
+      pickle.dump(self.clusters ,open('pclusters.bnbb','wb'))
+
+      if len(remIndices)<2:
+        break
+        
+      out1 = self.PDistMat.tocsc()[:,remIndices]
+      self.PDistMat = out1.tocsr()[remIndices,:]
+      idxs = idxs[remIndices]
+
   def getPairwiseDistanceMatrix(self):
     """
       It is sloghtly slower but memory efficient, fast implementation is not tractable in terms of memory for such a scale
     """
+    self.clusters = []
     dataSize = self.data_points.shape
     self.PDistMat = sp.sparse.csr_matrix((dataSize[0],dataSize[0]))
     for k in range(dataSize[0]):
@@ -68,6 +100,10 @@ class CoCluster:
         #print kMins[pt],k,self.PDistMat.shape,kDists[pt],pt,kDists
         self.PDistMat[k,kMins[pt]]=kDists[pt]
         self.PDistMat[kMins[pt],k]=kDists[pt]
+
+    #Here we go a bit low-level and apply the e^(-1.x) to the data array
+    self.PDistMat.data = np.exp((-1)*self.PDistMat.data)
+
     pickle.dump(self.PDistMat,open('pdist.bnbb','wb'))
 
   def runAffinityPropogation(self):
