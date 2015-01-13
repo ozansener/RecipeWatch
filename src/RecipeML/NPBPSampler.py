@@ -258,7 +258,7 @@ class NPBPSampler:
           self.F = F
 
           self.states['v'][0]=np.concatenate((self.states['v'][0],ThetaNew['v'][0][-1,:]),axis=0)
-          self.states['l'][0]=np.concatenate((self.states['l'][0],ThetaNew['v'][0][-1,:]),axis=0)
+          self.states['l'][0]=np.concatenate((self.states['l'][0],ThetaNew['l'][0][-1,:]),axis=0)
 
           self.eta[sq]=np.concatenate((self.eta[sq],preComputedEta[sq][:-1,-1]),axis=1)
           self.eta[sq]=np.concatenate((self.eta[sq],preComputedEta[sq][-1,:]),axis=0)
