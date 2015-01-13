@@ -493,18 +493,18 @@ class NPBPSampler:
     self.lamb = 1.0
     self.kappa = 2.0
 
-    self.numVidObjs = 2
-    self.numLangObjs = 2
+    self.numVidObjs = 20
+    self.numLangObjs = 67
 
     #self.F = np.mat(np.ones((len(problemInstance['Videos']),1))) # All videos are from a single mean
     #self.F = np.mat(np.ones((5,1))) # All videos are from a single mean
     self.nIter = 100
     self.states = {}
-    self.states['v']=[np.ones((1,2))*0.5]
-    self.states['l']=[np.ones((1,2))*0.5]
+    self.states['v']=[np.ones((1,20))*0.5]
+    self.states['l']=[np.ones((1,67))*0.5]
     #Theta
-    self.minW = 2
-    self.maxW = 9
+    self.minW = 5
+    self.maxW = 15
 
     print 'GT:',self.F
 
