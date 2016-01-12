@@ -1,3 +1,7 @@
+DISCLAIMER
+==========
+We are currently in the process of cleaning/documenting the code hence we advise everyone to wait for the relase. For the brave ones, the code is here. In order to use it you also need ModalDB https://github.com/ozansener/ModalDB and push all your data and features into it.
+
 RecipeWatch
 ===========
 RecipeWatch is exploring concepts from youtube videos with no supervision. Project is composed of following sub-modules:
